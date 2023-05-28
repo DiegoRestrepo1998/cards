@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cards-dep
+  labels:
+    app: micro-cards
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: micro-cards
+  template:
+    metadata: 
+      labels:
+        app: micro-cards
+    spec: 
+      containers:
+        - name: micro-cards
+          image: dfrestrepo1998/microservicio_cards:1.0.0
+          ports:
+          - containerPort: 9000
+          env:
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: profiles-active
+          - name: SPRING_CONFIG_IMPORT
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: config-import   
+          - name: EUREKA_CLIENT_SERVICEURL_DEFAULTZONE
+            valueFrom:
+              configMapKeyRef: 
+                name: micropro-configmap
+                key: eureka-serviceurl  
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: micro-cards-service
+spec:
+  selector:
+    app: micro-cards
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
